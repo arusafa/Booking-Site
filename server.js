@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/userRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 const app = express();
 app.use(cors());
@@ -21,9 +22,11 @@ mongoose
 
 // Register routes
 app.use("/auth", authRoutes);
-app.use("/admin", userRoutes);
+app.use("/auth", userRoutes);
 app.use("/admin/hotel", hotelRoutes);
 app.use("/admin/room", roomRoutes);
+app.use("/booking", bookingRoutes);
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

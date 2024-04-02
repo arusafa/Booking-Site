@@ -133,9 +133,12 @@ router.get("/searchRoomByAmenities", async (req, res) => {
 router.get("/searchRoomByBedType", async (req, res) => {
   let query = {};
   // Expected query parameters could be "SingleBed", "QueenBed", etc.
-  Object.keys(req.query).forEach(key => {
+  Object.keys(req.query).forEach((key) => {
     // If the key matches one of the BedType schema keys and the value is "true"
-    if (['SingleBed', 'TwinBed', 'QueenBed', 'KingBed'].includes(key) && req.query[key] === 'true') {
+    if (
+      ["SingleBed", "TwinBed", "QueenBed", "KingBed"].includes(key) &&
+      req.query[key] === "true"
+    ) {
       query[`RoomOptions.BedType.${key}`] = true;
     }
   });
@@ -148,7 +151,9 @@ router.get("/searchRoomByBedType", async (req, res) => {
   try {
     const rooms = await Room.find(query);
     if (rooms.length === 0) {
-      return res.status(404).json({ message: "No rooms found with the specified bed type." });
+      return res
+        .status(404)
+        .json({ message: "No rooms found with the specified bed type." });
     }
     res.json(rooms);
   } catch (err) {
@@ -207,9 +212,5 @@ router.delete("/:id", authenticateToken, isAdmin, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-
-
-
 
 module.exports = router;

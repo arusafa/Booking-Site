@@ -4,7 +4,7 @@ const { authenticateToken, isAdmin } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Fetch all users
-router.get("/users", authenticateToken, isAdmin, async (req, res) => {
+router.get("/allUsers", authenticateToken, isAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
@@ -14,7 +14,7 @@ router.get("/users", authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Fetch a single user by ID
-router.get("/users/:id", authenticateToken, isAdmin, async (req, res) => {
+router.get("/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
@@ -27,7 +27,7 @@ router.get("/users/:id", authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Update a user by ID
-router.put("/users/:id", authenticateToken, isAdmin, async (req, res) => {
+router.put("/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -39,7 +39,7 @@ router.put("/users/:id", authenticateToken, isAdmin, async (req, res) => {
 });
 
 // Delete a user by ID
-router.delete("/users/:id", authenticateToken, isAdmin, async (req, res) => {
+router.delete("/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.send("User deleted successfully");

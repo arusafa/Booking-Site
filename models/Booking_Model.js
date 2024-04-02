@@ -17,7 +17,7 @@ const BookingSchema = new Schema({
     CheckInDate: Date,
     CheckOutDate: Date,
     NumberOfGuests: Number,
-    TotalPrice: Number // This would ideally be calculated considering the room price and tax
+    TotalPrice: Number
 });
 
 module.exports = mongoose.model('Booking', BookingSchema);
