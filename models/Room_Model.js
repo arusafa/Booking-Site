@@ -40,7 +40,7 @@ const RoomOptionSchema = new Schema({
 });
 
 const RoomSchema = new Schema({
-    RoomOptions: [RoomOptionSchema] // This will allow for multiple room types within RoomOptions
+    RoomOptions: [RoomOptionSchema]
 });
 
 module.exports = mongoose.model('Room', RoomSchema);

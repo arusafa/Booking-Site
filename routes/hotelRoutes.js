@@ -1,74 +1,33 @@
 const express = require("express");
 const Hotel = require("../models/Hotel_Model");
 const { authenticateToken, isAdmin } = require("../middleware/authMiddleware");
-const Room = require("../models/Room_Model");
-const User = require("../models/User_Model");
 
 const router = express.Router();
 
-// Fetch all hotels - Open to all users
-router.get("/all-hotels", async (req, res) => {
+// Create a new hotel
+router.post("/newHotel", authenticateToken, isAdmin, async (req, res) => {
+  const hotelData = req.body;
   try {
-    const hotels = await Hotel.find();
-    res.json(hotels);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Create a new hotel - Requires authentication and admin role
-router.post("/newHotel", async (req, res) => {
-  try {
-    const hotelData = req.body;
     const hotel = new Hotel(hotelData);
-    // Save the hotel to the database
     const newHotel = await hotel.save();
-
     res.status(201).json(newHotel);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// POST route to post a review on a hotel
-router.post("/:hotelId/reviews", async (req, res) => {
+// Fetch all hotels
+router.get("/allHotels", async (req, res) => {
   try {
-    const { userId, rating, reviewText } = req.body;
-    const hotelId = req.params.hotelId;
-
-    // Check if the user exists
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    // Check if the hotel exists
-    const hotel = await Hotel.findById(hotelId);
-    if (!hotel) {
-      return res.status(404).json({ message: "Hotel not found." });
-    }
-
-    // Create the review object
-    const review = {
-      userId: userId,
-      rating: rating,
-      reviewText: reviewText
-    };
-
-    // Add the review to the hotel's reviews
-    hotel.HotelReviews.push(review);
-
-    // Save the updated hotel
-    await hotel.save();
-
-    res.status(201).json({ message: "Review posted successfully." });
+    const hotels = await Hotel.find();
+    res.json(hotels);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 // search hotels by Name - Open to all users
-router.get("/searchByName", async (req, res) => {
+router.get("/searchHotelByName", async (req, res) => {
   const name = req.query.name;
 
   if (!name) {
@@ -93,7 +52,7 @@ router.get("/searchByName", async (req, res) => {
 });
 
 // search hotels by Country - Open to all users
-router.get("/searchByCountry", async (req, res) => {
+router.get("/searchHotelByCountry", async (req, res) => {
   const country = req.query.country;
 
   if (!country) {
@@ -116,7 +75,7 @@ router.get("/searchByCountry", async (req, res) => {
 });
 
 // search hotels by City - Open to all users
-router.get("/searchByCity", async (req, res) => {
+router.get("/searchHotelByCity", async (req, res) => {
   const city = req.query.city;
 
   if (!city) {
@@ -139,7 +98,7 @@ router.get("/searchByCity", async (req, res) => {
 });
 
 // search hotels by Province - Open to all users
-router.get("/searchByProvince", async (req, res) => {
+router.get("/searchHotelByProvince", async (req, res) => {
   const province = req.query.province;
 
   if (!province) {
@@ -161,16 +120,17 @@ router.get("/searchByProvince", async (req, res) => {
   }
 });
 
-// Fetch a single hotel by ID - Open to signed-up users
-router.get("/:id", authenticateToken, async (req, res) => {
+// Get a specific hotel by ID
+router.get("/:hotelId", async (req, res) => {
+  const { hotelId } = req.params;
   try {
-    const hotel = await Hotel.findById(req.params.id);
-    if (hotel == null) {
-      return res.status(404).json({ message: "Cannot find hotel" });
+    const hotel = await Hotel.findById(hotelId);
+    if (!hotel) {
+      return res.status(404).json({ message: "Hotel not found." });
     }
     res.json(hotel);
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -213,5 +173,4 @@ router.delete("/:id", [authenticateToken, isAdmin], async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 module.exports = router;
