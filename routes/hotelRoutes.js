@@ -163,7 +163,7 @@ router.get("/:hotelId", async (req, res) => {
 });
 
 // Update a hotel by ID - Requires authentication and admin role
-router.patch("/:id", [authenticateToken, isAdmin], async (req, res) => {
+router.put("/:id", [authenticateToken, isAdmin], async (req, res) => {
   try {
     const hotel = await Hotel.findById(req.params.id);
     if (hotel == null) {
