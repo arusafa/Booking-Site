@@ -1,7 +1,7 @@
 const express = require("express");
 const Hotel = require("../models/Hotel_Model");
 const { authenticateToken, isAdmin } = require("../middleware/authMiddleware");
-
+const Room = require("../models/Room_Model");
 const router = express.Router();
 
 // Create a new hotel
@@ -15,6 +15,34 @@ router.post("/newHotel", authenticateToken, isAdmin, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+// Add a room to a specific hotel
+router.post(
+  "/:hotelId/addRoom",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    const { hotelId } = req.params;
+    const roomData = req.body;
+
+    try {
+      const hotel = await Hotel.findById(hotelId);
+      if (!hotel) {
+        return res.status(404).json({ message: "Hotel not found." });
+      }
+
+      const room = new Room(roomData);
+      const newRoom = await room.save();
+
+      hotel.Rooms.push(newRoom);
+      await hotel.save();
+
+      res.status(201).json(newRoom);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+);
 
 // Fetch all hotels
 router.get("/allHotels", async (req, res) => {

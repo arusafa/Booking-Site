@@ -27,33 +27,6 @@ router.get("/allRooms", async (req, res) => {
   }
 });
 
-// Add a room to a specific hotel
-router.post(
-  "/:hotelId/addRoom",
-  authenticateToken,
-  isAdmin,
-  async (req, res) => {
-    const { hotelId } = req.params;
-    const roomData = req.body;
-
-    try {
-      const hotel = await Hotel.findById(hotelId);
-      if (!hotel) {
-        return res.status(404).json({ message: "Hotel not found." });
-      }
-
-      const room = new Room(roomData);
-      const newRoom = await room.save();
-
-      hotel.Rooms.push(newRoom);
-      await hotel.save();
-
-      res.status(201).json(newRoom);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  }
-);
 
 // Search rooms by RoomName
 router.get("/searchRoomByName", async (req, res) => {
