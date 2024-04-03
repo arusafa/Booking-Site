@@ -149,7 +149,7 @@ router.get("/:roomId", async (req, res) => {
 });
 
 // Fetch a room by Hotel ID
-router.get("/byHotel/:hotelId", async (req, res) => {
+router.get("/byHotel/:id", async (req, res) => {
   const { hotelId } = req.params;
   try {
     const rooms = await Room.find({ HotelId: hotelId });
