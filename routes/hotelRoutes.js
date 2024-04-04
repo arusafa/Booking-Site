@@ -16,6 +16,16 @@ router.post("/newHotel", authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
+// Fetch all hotels
+router.get("/allHotels", async (req, res) => {
+  try {
+    const hotels = await Hotel.find();
+    res.json(hotels);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Add a room to a specific hotel
 router.post(
   "/:hotelId/addRoom",
@@ -44,11 +54,16 @@ router.post(
   }
 );
 
-// Fetch all hotels
-router.get("/allHotels", async (req, res) => {
+
+// Fetch rooms by Hotel ID
+router.get("/byHotel/:id", async (req, res) => {
+  const { hotelId } = req.params;
   try {
-    const hotels = await Hotel.find();
-    res.json(hotels);
+    const rooms = await Room.find({ HotelId: hotelId });
+    if (rooms.length === 0) {
+      return res.status(404).json({ message: "No rooms found for this hotel." });
+    }
+    res.json(rooms);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -201,4 +216,26 @@ router.delete("/:id", [authenticateToken, isAdmin], async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+//Delete a room by ID AND by hotel ID - Requires authentication and admin role
+router.delete("/:hotelId/:roomId", [authenticateToken, isAdmin], async (req, res) => {
+  try {
+    const hotel = await Hotel.findById(req.params.hotelId);
+    if (hotel == null) {
+      return res.status(404).json({ message: "Cannot find hotel" });
+    }
+
+    const room = await Room.findById(req.params.roomId);
+    if (room == null) {
+      return res.status(404).json({ message: "Cannot find room" });
+    }
+
+    await room.remove();
+    res.json({ message: "Deleted Room" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 module.exports = router;
