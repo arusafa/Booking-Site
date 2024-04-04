@@ -44,20 +44,6 @@ router.post(
   }
 );
 
-// Fetch a room by Hotel ID
-router.get("/byHotel/:id", async (req, res) => {
-  const { hotelId } = req.params;
-  try {
-    const rooms = await Room.find({ HotelId: hotelId });
-    if (rooms.length === 0) {
-      return res.status(404).json({ message: "No rooms found for this hotel." });
-    }
-    res.json(rooms);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // Fetch all hotels
 router.get("/allHotels", async (req, res) => {
   try {
