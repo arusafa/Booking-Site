@@ -27,7 +27,6 @@ router.get("/allRooms", async (req, res) => {
   }
 });
 
-
 // Search rooms by RoomName
 router.get("/searchRoomByName", async (req, res) => {
   const roomName = req.query.roomName;
