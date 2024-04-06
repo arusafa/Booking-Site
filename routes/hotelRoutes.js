@@ -26,43 +26,42 @@ router.get("/allHotels", async (req, res) => {
   }
 });
 
-// Add a room to a specific hotel
-router.post(
-  "/:hotelId/addRoom",
-  authenticateToken,
-  isAdmin,
-  async (req, res) => {
-    const { hotelId } = req.params;
-    const roomData = req.body;
-
-    try {
-      const hotel = await Hotel.findById(hotelId);
-      if (!hotel) {
-        return res.status(404).json({ message: "Hotel not found." });
-      }
-
-      const room = new Room(roomData);
-      const newRoom = await room.save();
-
-      hotel.Rooms.push(newRoom);
-      await hotel.save();
-
-      res.status(201).json(newRoom);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  }
-);
-
-
-// Fetch rooms by Hotel ID
-router.get("/byHotel/:id", async (req, res) => {
+// Add a room option to a specific hotel
+router.post("/addRoom/:hotelId", authenticateToken, isAdmin, async (req, res) => {
   const { hotelId } = req.params;
+  const roomOptionData = req.body;
+
   try {
-    const rooms = await Room.find({ HotelId: hotelId });
+    const updatedHotel = await Hotel.findByIdAndUpdate(
+      hotelId,
+      { $push: { Rooms: roomOptionData } },
+      { new: true }
+    );
+
+    if (!updatedHotel) {
+      return res.status(404).json({ message: "Hotel not found or failed to add room." });
+    }
+
+    res.status(201).json({ message: "Room added successfully", updatedHotel });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Retrieve rooms for a specific hotel
+router.get("/hotel-rooms/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const hotel = await Hotel.findById(id);
+    if (!hotel) {
+      return res.status(404).json({ message: "Hotel not found." });
+    }
+
+    const rooms = hotel.Rooms;
     if (rooms.length === 0) {
       return res.status(404).json({ message: "No rooms found for this hotel." });
     }
+
     res.json(rooms);
   } catch (error) {
     res.status(500).json({ message: error.message });
