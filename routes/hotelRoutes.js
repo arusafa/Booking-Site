@@ -205,16 +205,17 @@ router.put("/:id", [authenticateToken, isAdmin], async (req, res) => {
 router.delete("/:id", [authenticateToken, isAdmin], async (req, res) => {
   try {
     const hotel = await Hotel.findById(req.params.id);
-    if (hotel == null) {
+    if (!hotel) {
       return res.status(404).json({ message: "Cannot find hotel" });
     }
 
-    await hotel.remove();
+    await hotel.deleteOne(); // Using deleteOne() method to delete the document
     res.json({ message: "Deleted Hotel" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 //Delete a room by ID AND by hotel ID - Requires authentication and admin role
 router.delete("/:hotelId/:roomId", [authenticateToken, isAdmin], async (req, res) => {
