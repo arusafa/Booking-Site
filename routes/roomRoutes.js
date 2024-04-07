@@ -178,11 +178,14 @@ router.delete("/:id", authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: "Room not found." });
     }
 
-    await room.remove();
+    // Option 1: Using findByIdAndDelete method
+    await Room.findByIdAndDelete(id);
+
     res.json({ message: "Deleted Room" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 module.exports = router;
