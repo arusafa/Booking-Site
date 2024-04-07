@@ -1,8 +1,9 @@
 const express = require("express");
-const Hotel = require("../models/Hotel_Model");
 const { authenticateToken, isAdmin } = require("../middleware/authMiddleware");
-const Room = require("../models/Room_Model");
 const router = express.Router();
+
+const Hotel = require("../models/Hotel_Model");
+const Room = require("../models/Room_Model");
 
 // Create a new hotel
 router.post("/newHotel", authenticateToken, isAdmin, async (req, res) => {
@@ -26,27 +27,38 @@ router.get("/allHotels", async (req, res) => {
   }
 });
 
-// Add a room option to a specific hotel
-router.post("/addRoom/:hotelId", authenticateToken, isAdmin, async (req, res) => {
-  const { hotelId } = req.params;
-  const roomOptionData = req.body;
+// Add a room to a hotel - Requires authentication and admin role
+router.post(
+  "/addRoom/:hotelId",
+  authenticateToken,
+  isAdmin,
+  async (req, res) => {
+    const { hotelId } = req.params;
+    const roomOptionData = req.body;
 
-  try {
-    const updatedHotel = await Hotel.findByIdAndUpdate(
-      hotelId,
-      { $push: { Rooms: roomOptionData } },
-      { new: true }
-    );
+    try {
+      const newRoom = await Room.create({ RoomOptions: [roomOptionData] });
+      const updatedHotel = await Hotel.findByIdAndUpdate(
+        hotelId,
+        { $push: { Rooms: newRoom._id } },
+        { new: true }
+      );
 
-    if (!updatedHotel) {
-      return res.status(404).json({ message: "Hotel not found or failed to add room." });
+      if (!updatedHotel) {
+        return res
+          .status(404)
+          .json({ message: "Hotel not found or failed to add room." });
+      }
+
+      res
+        .status(201)
+        .json({ message: "Room added successfully", updatedHotel });
+    } catch (error) {
+      console.error(error);
+      res.status(400).json({ message: error.message });
     }
-
-    res.status(201).json({ message: "Room added successfully", updatedHotel });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
   }
-});
+);
 
 // Retrieve rooms for a specific hotel
 router.get("/hotel-rooms/:id", async (req, res) => {
@@ -59,7 +71,9 @@ router.get("/hotel-rooms/:id", async (req, res) => {
 
     const rooms = hotel.Rooms;
     if (rooms.length === 0) {
-      return res.status(404).json({ message: "No rooms found for this hotel." });
+      return res
+        .status(404)
+        .json({ message: "No rooms found for this hotel." });
     }
 
     res.json(rooms);
@@ -216,26 +230,28 @@ router.delete("/:id", [authenticateToken, isAdmin], async (req, res) => {
   }
 });
 
-
 //Delete a room by ID AND by hotel ID - Requires authentication and admin role
-router.delete("/:hotelId/:roomId", [authenticateToken, isAdmin], async (req, res) => {
-  try {
-    const hotel = await Hotel.findById(req.params.hotelId);
-    if (hotel == null) {
-      return res.status(404).json({ message: "Cannot find hotel" });
-    }
+router.delete(
+  "/:hotelId/:roomId",
+  [authenticateToken, isAdmin],
+  async (req, res) => {
+    try {
+      const hotel = await Hotel.findById(req.params.hotelId);
+      if (hotel == null) {
+        return res.status(404).json({ message: "Cannot find hotel" });
+      }
 
-    const room = await Room.findById(req.params.roomId);
-    if (room == null) {
-      return res.status(404).json({ message: "Cannot find room" });
-    }
+      const room = await Room.findById(req.params.roomId);
+      if (room == null) {
+        return res.status(404).json({ message: "Cannot find room" });
+      }
 
-    await room.remove();
-    res.json({ message: "Deleted Room" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+      await room.remove();
+      res.json({ message: "Deleted Room" });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
-});
-
+);
 
 module.exports = router;
