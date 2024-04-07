@@ -148,7 +148,7 @@ router.get("/:roomId", async (req, res) => {
 });
 
 // Update a room by ID
-router.patch("/:id", authenticateToken, isAdmin, async (req, res) => {
+router.put("/:id", authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const room = await Room.findById(id);
