@@ -34,14 +34,14 @@ router.post(
   isAdmin,
   async (req, res) => {
     const { hotelId } = req.params;
-    const roomOptionData = req.body;
+    const roomData = req.body;
 
     try {
-      const newRoom = await Room.create({ RoomOptions: [roomOptionData] });
+      const newRoom = await Room.create(roomData);
       const updatedHotel = await Hotel.findByIdAndUpdate(
         hotelId,
         { $push: { Rooms: newRoom._id } },
-        { new: true }
+        { new: true, useFindAndModify: false }
       );
 
       if (!updatedHotel) {
@@ -64,19 +64,12 @@ router.post(
 router.get("/hotel-rooms/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const hotel = await Hotel.findById(id);
-    if (!hotel) {
+    const hotelWithRooms = await Hotel.findById(id).populate("Rooms");
+    if (!hotelWithRooms) {
       return res.status(404).json({ message: "Hotel not found." });
     }
-
-    const rooms = hotel.Rooms;
-    if (rooms.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No rooms found for this hotel." });
-    }
-
-    res.json(rooms);
+    const rooms = hotelWithRooms.Rooms;
+    res.json(rooms); // This will return the populated room details
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
